@@ -1,62 +1,200 @@
 import Image from "next/image";
+import { fetchChannelVideos } from "./lib/youtube";
+import VideoCarousel from "./components/VideoCarousel";
+import VideoList from "./components/VideoList";
 
-export default function Home() {
+export const revalidate = 900; // revalidate every 15 minutes
+
+export default async function Home() {
+  const videos = await fetchChannelVideos(10);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+    <div className="flex flex-col min-h-screen bg-[#E45F0B] text-[#F7EFE5] font-sans">
+      {/* Header */}
+      <header className="w-full max-w-[1200px] mx-auto px-6 pt-14 pb-5">
+        {/* Desktop header */}
+        <div className="hidden md:flex items-center justify-center gap-30">
+          {/* Left: Party 101 */}
+          <div>
             <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="https://www.party101.club/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-opacity hover:opacity-70"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+              <Image
+                src="/party101_logo.png"
+                alt="Party 101"
+                width={384}
+                height={168}
+                className="h-9 w-auto"
+                priority
+              />
+            </a>
+          </div>
+
+          {/* Center: Mash Bennett */}
+          <div>
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/mash_bennett_logo.svg"
+              alt="Mash Bennett"
+              width={218}
+              height={82}
+              className="h-20 w-auto"
+              priority
             />
-            Deploy Now
-          </a>
+          </div>
+
+          {/* Right: Social Icons */}
+          <div className="flex items-center gap-5">
+            <a
+              href="https://www.instagram.com/mattbennett/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="transition-opacity hover:opacity-70"
+            >
+              <Image
+                src="/ig.png"
+                alt="Instagram"
+                width={128}
+                height={128}
+                className="h-6 w-6"
+              />
+            </a>
+            <a
+              href="https://www.tiktok.com/@mattbennett"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok"
+              className="transition-opacity hover:opacity-70"
+            >
+              <Image
+                src="/tt.png"
+                alt="TikTok"
+                width={112}
+                height={128}
+                className="h-6 w-auto"
+              />
+            </a>
+          </div>
+        </div>
+
+        {/* Mobile header */}
+        <div className="flex flex-col items-center gap-10 md:hidden">
+          {/* Top: Mash Bennett */}
+          <Image
+            src="/mash_bennett_logo.svg"
+            alt="Mash Bennett"
+            width={218}
+            height={82}
+            className="h-16 w-auto"
+            priority
+          />
+
+          {/* Bottom row: Party 101 + Social Icons side by side */}
+          <div className="flex items-center justify-around w-full">
+            <a
+              href="https://www.party101.club/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-opacity hover:opacity-70"
+            >
+              <Image
+                src="/party101_logo.png"
+                alt="Party 101"
+                width={384}
+                height={168}
+                className="h-8 w-auto"
+                priority
+              />
+            </a>
+            <div className="flex items-center gap-5">
+              <a
+                href="https://www.instagram.com/mattbennett/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="transition-opacity hover:opacity-70"
+              >
+                <Image
+                  src="/ig.png"
+                  alt="Instagram"
+                  width={128}
+                  height={128}
+                  className="h-6 w-6"
+                />
+              </a>
+              <a
+                href="https://www.tiktok.com/@mattbennett"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="transition-opacity hover:opacity-70"
+              >
+                <Image
+                  src="/tt.png"
+                  alt="TikTok"
+                  width={112}
+                  height={128}
+                  className="h-6 w-auto"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex flex-1 flex-col items-center justify-start pt-14 md:justify-center md:pt-0 px-0 pb-16">
+        {videos.length > 0 ? (
+          <>
+            {/* Desktop: carousel */}
+            <div className="hidden md:block w-full">
+              <VideoCarousel videos={videos} />
+            </div>
+            {/* Mobile: scrollable list */}
+            <div className="block md:hidden w-full">
+              <VideoList videos={videos} />
+            </div>
+          </>
+        ) : (
+          <div className="w-full md:w-[85%] lg:w-[60%] mx-auto px-4">
+            {/* Fallback: static video if API fails */}
+            <div
+              className="relative w-full"
+              style={{ aspectRatio: "16 / 9" }}
+            >
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ border: "none" }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="flex justify-center md:justify-end mt-4 w-full md:w-[85%] lg:w-[60%] mx-auto px-4">
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://www.youtube.com/@MottBonnott"
             target="_blank"
             rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[#F7EFE5] font-bold tracking-wide transition-opacity hover:opacity-70"
+            style={{ fontSize: "1.25rem" }}
           >
-            Documentation
+            <span>see more on YouTube</span>
+            <Image
+              src="/arrow.svg"
+              alt=""
+              width={29}
+              height={23}
+              aria-hidden={true}
+              className="h-5 w-auto"
+            />
           </a>
         </div>
       </main>
