@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import useEmblaCarousel from "embla-carousel-react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 
 interface VideoCarouselProps {
@@ -9,83 +8,113 @@ interface VideoCarouselProps {
 }
 
 export default function VideoCarousel({ videos }: VideoCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "center",
-    loop: false,
-    containScroll: false,
-  });
-
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  useEffect(() => {
-    if (!emblaApi) return;
+  const goTo = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < videos.length) {
+        setSelectedIndex(index);
+      }
+    },
+    [videos.length]
+  );
 
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-    };
+  const canGoPrev = selectedIndex > 0;
+  const canGoNext = selectedIndex < videos.length - 1;
 
-    emblaApi.on("reInit", onSelect);
-    emblaApi.on("select", onSelect);
+  const getSlideStyle = (index: number): React.CSSProperties => {
+    const diff = index - selectedIndex;
 
-    return () => {
-      emblaApi.off("reInit", onSelect);
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi]);
+    if (diff === 0) {
+      return {
+        transform: "translateX(0%) scale(1)",
+        zIndex: 3,
+        opacity: 1,
+        pointerEvents: "auto",
+      };
+    } else if (diff === 1) {
+      return {
+        transform: "translateX(18%) scale(0.85)",
+        zIndex: 2,
+        opacity: 0.6,
+        pointerEvents: "none",
+      };
+    } else if (diff === -1) {
+      return {
+        transform: "translateX(-18%) scale(0.85)",
+        zIndex: 2,
+        opacity: 0.6,
+        pointerEvents: "none",
+      };
+    } else {
+      return {
+        transform: `translateX(${diff > 0 ? "60%" : "-60%"}) scale(0.7)`,
+        zIndex: 0,
+        opacity: 0,
+        pointerEvents: "none",
+      };
+    }
+  };
+
+  const isNearby = (index: number) => Math.abs(index - selectedIndex) <= 2;
 
   return (
-    <div className="overflow-hidden w-full" ref={emblaRef}>
-      <div className="flex gap-8 md:gap-12">
+    <div className="relative w-[60%] mx-auto flex items-center">
+      {/* Left chevron */}
+      <button
+        type="button"
+        onClick={() => goTo(selectedIndex - 1)}
+        disabled={!canGoPrev}
+        aria-label="Previous video"
+        className={`absolute z-10 transition-opacity ${
+          canGoPrev ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-20 cursor-default"
+        }`}
+        style={{ left: "-200px" }}
+      >
+        <Image
+          src="/chevron.svg"
+          alt=""
+          width={42}
+          height={74}
+          aria-hidden={true}
+          className="h-12 w-auto"
+        />
+      </button>
+
+      {/* Slides */}
+      <div className="relative w-full" style={{ aspectRatio: "16 / 9" }}>
         {videos.map((video, index) => {
-          const isActive = index === selectedIndex;
-          const isNearby = Math.abs(index - selectedIndex) <= 2;
+          const nearby = isNearby(index);
+          const slideStyle = getSlideStyle(index);
 
           return (
             <div
               key={video.videoId}
-              className={`min-w-0 relative flex-[0_0_85%] md:flex-[0_0_60%] transition-all duration-500 ease-in-out origin-center ${
-                isActive ? "opacity-100 scale-100" : "opacity-50 scale-[0.7]"
-              }`}
+              className="absolute inset-0 transition-all duration-500 ease-in-out"
+              style={{
+                ...slideStyle,
+                pointerEvents: slideStyle.pointerEvents as "auto" | "none",
+              }}
             >
-              <div
-                className="relative w-full"
-                style={{ aspectRatio: "16 / 9" }}
-              >
-                {isNearby ? (
-                  <>
-                    <iframe
-                      className="absolute inset-0 w-full h-full"
-                      src={`https://www.youtube.com/embed/${video.videoId}`}
-                      title={video.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      style={{ border: "none" }}
-                    />
-                    {/* Clickable overlay for inactive neighbors */}
-                    {!isActive && (
-                      <button
-                        type="button"
-                        className="absolute inset-0 w-full h-full cursor-pointer z-10"
-                        onClick={() => emblaApi?.scrollTo(index)}
-                        aria-label={`Play ${video.title}`}
-                      />
-                    )}
-                  </>
+              <div className="relative w-full h-full">
+                {nearby ? (
+                  <iframe
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube.com/embed/${video.videoId}`}
+                    title={video.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    style={{ border: "none" }}
+                  />
                 ) : (
-                  <button
-                    type="button"
-                    className="block w-full h-full cursor-pointer"
-                    onClick={() => emblaApi?.scrollTo(index)}
-                    aria-label={`Play ${video.title}`}
-                  >
+                  <div className="relative w-full h-full">
                     <Image
                       src={video.thumbnail}
                       alt={video.title}
                       fill
-                      sizes="(max-width: 768px) 85vw, 60vw"
+                      sizes="60vw"
                       className="object-cover"
                     />
-                    {/* Play button overlay */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <svg
                         width="64"
@@ -99,13 +128,34 @@ export default function VideoCarousel({ videos }: VideoCarouselProps) {
                         <polygon points="26,20 26,44 46,32" fill="white" />
                       </svg>
                     </div>
-                  </button>
+                  </div>
                 )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Right chevron (flipped horizontally) */}
+      <button
+        type="button"
+        onClick={() => goTo(selectedIndex + 1)}
+        disabled={!canGoNext}
+        aria-label="Next video"
+        className={`absolute z-10 transition-opacity ${
+          canGoNext ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-20 cursor-default"
+        }`}
+        style={{ right: "-200px" }}
+      >
+        <Image
+          src="/chevron.svg"
+          alt=""
+          width={42}
+          height={74}
+          aria-hidden={true}
+          className="h-12 w-auto -scale-x-100"
+        />
+      </button>
     </div>
   );
 }
