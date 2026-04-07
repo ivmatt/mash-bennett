@@ -67,7 +67,7 @@ export default function VideoCarousel({ videos }: VideoCarouselProps) {
         disabled={!canGoPrev}
         aria-label="Previous video"
         className={`absolute z-10 transition-opacity ${
-          canGoPrev ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-20 cursor-default"
+          canGoPrev ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"
         }`}
         style={{ left: "-200px" }}
       >
@@ -143,7 +143,7 @@ export default function VideoCarousel({ videos }: VideoCarouselProps) {
         disabled={!canGoNext}
         aria-label="Next video"
         className={`absolute z-10 transition-opacity ${
-          canGoNext ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-20 cursor-default"
+          canGoNext ? "opacity-70 hover:opacity-100 cursor-pointer" : "opacity-0 pointer-events-none"
         }`}
         style={{ right: "-200px" }}
       >
